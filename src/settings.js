@@ -2,7 +2,7 @@
 
 const KEY = 'book-memo-settings';
 export const DEFAULTS = {
-  engine: 'tesseract', // 'tesseract' | 'claude'
+  engine: 'manual', // 'manual'(iPhone標準の文字認識を使う) | 'tesseract' | 'claude'
   vertical: false, // 縦書き(Tesseract のみ)
   apiKey: '',
   model: 'claude-sonnet-5-5',

@@ -154,12 +154,22 @@ async function viewNote({ bookId, noteId }) {
           <input type="file" id="cam" accept="image/*" capture="environment">
           <input type="file" id="lib" accept="image/*">
           <img id="preview" class="preview" alt="" hidden>
-          <div id="status" class="status"></div>`
+          <div id="status" class="status"></div>
+          <div id="live-hint" class="hint" hidden>
+            <b>文字の取り込み方(iPhone 標準)</b>
+            <ol>
+              <li>上の写真の文字を<b>長押し</b>して範囲を選び、「コピー」</li>
+              <li>下の「クリップボードから貼り付け」を押す</li>
+            </ol>
+            または、本文欄をタップ → キーボード上の <b>📷(テキストを読み取り)</b> で、本のページを映して取り込みます。
+            <br><span class="muted">写真をタップすると大きく表示します。</span>
+          </div>`
     }
     <label for="page">ページ</label>
     <input type="text" id="page" inputmode="numeric" value="${esc(existing?.page ?? '')}">
     <label for="quote">本文(引用)</label>
     <textarea id="quote">${esc(existing?.quote ?? '')}</textarea>
+    <div class="row"><button class="btn secondary" id="paste" type="button">クリップボードから貼り付け</button></div>
     <label for="comment">所感・メモ</label>
     <textarea id="comment">${esc(existing?.comment ?? '')}</textarea>
     <div class="row">
@@ -176,6 +186,13 @@ async function viewNote({ bookId, noteId }) {
     if (!file) return;
     $preview.src = URL.createObjectURL(file);
     $preview.hidden = false;
+    $preview.classList.remove('big');
+    if (settings.engine === 'manual') {
+      ocrKind = 'manual';
+      $status.textContent = '';
+      document.getElementById('live-hint').hidden = false;
+      return;
+    }
     $status.textContent = '画像を準備しています…';
     try {
       const blob = await prepareImage(file);
@@ -192,7 +209,21 @@ async function viewNote({ bookId, noteId }) {
       $status.textContent = `読み取りに失敗しました: ${err.message}`;
     }
   }
+  document.getElementById('paste').onclick = async () => {
+    try {
+      const text = (await navigator.clipboard.readText()).trim();
+      if (!text) {
+        toast('クリップボードが空です');
+        return;
+      }
+      $quote.value = $quote.value ? `${$quote.value}
+${text}` : text;
+    } catch {
+      toast('貼り付けできませんでした。本文欄を長押しして「ペースト」してください');
+    }
+  };
   if (!existing) {
+    $preview.onclick = () => $preview.classList.toggle('big');
     document.getElementById('cam').onchange = (e) => onPicked(e.target.files[0]);
     document.getElementById('lib').onchange = (e) => onPicked(e.target.files[0]);
   }
@@ -234,7 +265,8 @@ function viewSettings() {
   $app.innerHTML = `
     <label for="engine">文字の読み取り方式</label>
     <select id="engine">
-      <option value="tesseract" ${s.engine === 'tesseract' ? 'selected' : ''}>端末内(無料・キー不要)</option>
+      <option value="manual" ${s.engine === 'manual' ? 'selected' : ''}>iPhone 標準の文字認識(おすすめ・無料。写真から長押しでコピー)</option>
+      <option value="tesseract" ${s.engine === 'tesseract' ? 'selected' : ''}>端末内 Tesseract(無料・精度は低め)</option>
       <option value="claude" ${s.engine === 'claude' ? 'selected' : ''}>Claude 画像入力(高精度・API キーが必要)</option>
     </select>
     <label><input type="checkbox" id="vertical" ${s.vertical ? 'checked' : ''}> 縦書きの本(端末内方式のみ)</label>

@@ -37,6 +37,9 @@ textarea { min-height: 7em; resize: vertical; }
 .row > * { flex: 1; }
 .empty { text-align: center; color: var(--muted); padding: 40px 0; }
 .preview { max-width: 100%; max-height: 40vh; display: block; margin: 8px auto; border-radius: 8px; }
+.preview.big { max-height: none; }
+.hint { margin: 8px 0; padding: 10px 12px; border-radius: 10px; background: rgba(47, 79, 79, .08); font-size: 14px; line-height: 1.7; }
+.hint ol { margin: 4px 0; padding-left: 1.4em; }
 .status { margin: 8px 0; color: var(--muted); font-size: 14px; }
 .warn { margin: 8px 0; padding: 8px 10px; border-radius: 8px; background: rgba(200, 150, 0, .15); font-size: 13px; }
 #toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); transform: translateX(-50%); max-width: 90%; padding: 10px 16px; border-radius: 20px; background: #333; color: #fff; font-size: 14px; opacity: 0; pointer-events: none; transition: opacity .2s; }

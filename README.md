@@ -4,10 +4,11 @@
 保存したメモは書き出して、PC の `books import-memo` で本の資料ノート「引用・メモ」に取り込めます。
 
 - サーバーなし。静的ファイルだけで動きます。データは端末のブラウザ内(IndexedDB)に保存されます。
-- 文字の読み取りは 2 方式。設定画面で切り替えます。
-  - **端末内(Tesseract.js)**: 無料・API キー不要。初回は日本語データの読み込みに時間がかかります。縦書きの本は設定で「縦書き」を有効にします。
+- 文字の読み取りは 3 方式。設定画面で切り替えます。
+  - **iPhone 標準の文字認識(初期設定・おすすめ・無料)**: 撮影した写真の文字を長押しして選択 →「コピー」→「クリップボードから貼り付け」。または、本文欄をタップして、キーボード上の 📷(テキストを読み取り)で本のページを映して取り込みます。iOS の標準機能(Live Text)を使うので、アプリは自動では読み取りません。
+  - **端末内 Tesseract**: 無料・キー不要ですが、実際の本のページでは精度が低めです。
   - **Claude 画像入力**: 高精度。Anthropic の API キーが必要で、写真が API に送信され、利用量に応じた料金がかかります。キーは端末内に平文で保存されます。
-- 読み取り結果は、必ず画面で確認・修正してから保存します。
+- 読み取った文字は、必ず画面で確認・修正してから保存します。
 
 ## 試す(PC)
 
@@ -18,11 +19,17 @@ python -m http.server 8765 --directory memo-app
 
 ## iPhone で使う
 
-iPhone で使うには、HTTPS で公開された場所(GitHub Pages、Cloudflare Pages など)に `memo-app/` を置く必要があります(オフライン対応の Service Worker が HTTPS を要求するため)。
-公開すると URL が外部から見えるようになります(アプリにはあなたのデータは含まれません)。公開先の選択と実施は、あらかじめ相談してから行ってください。
-開いたら Safari の共有ボタン →「ホーム画面に追加」。
+公開先: https://daikisekiguchi.github.io/book-memo/ (GitHub Pages。リポジトリ: DaikiSekiguchi/book-memo、公開)
+iPhone の Safari で開き、共有ボタン →「ホーム画面に追加」。コードは誰でも見られますが、メモのデータは各端末の中だけにあります。
 
-同じ Wi-Fi の PC のサーバーに `http://<PCのIP>:8765/` でつなぐ試し方もできます(その場合、オフライン対応と自動更新は働きません)。
+**アプリを更新するとき**: `memo-app/` を直したら、公開用リポジトリへ反映します(`book-archive` 本体は公開しない)。
+
+```powershell
+git clone https://github.com/DaikiSekiguchi/book-memo $env:TEMP\book-memo-pub
+Copy-Item memo-app\* $env:TEMP\book-memo-pub -Recurse -Force
+cd $env:TEMP\book-memo-pub; git add -A; git commit -m "Update"; git push
+```
+反映は数分かかります。Service Worker のキャッシュを更新するときは、`sw.js` の `CACHE` の版数(`book-memo-v1`)を上げてください。
 
 ## 書き出しと取り込み
 

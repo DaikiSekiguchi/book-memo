@@ -1,6 +1,6 @@
 // アプリ本体(同一オリジンの静的ファイル)をキャッシュして、オフラインでも開けるようにする。
 // OCR ライブラリや言語データなど外部のものは扱わない(Tesseract 側が自前でキャッシュする)。
-const CACHE = 'book-memo-v1';
+const CACHE = 'book-memo-v2';
 const SHELL = [
   './', './index.html', './styles.css', './manifest.webmanifest',
   './src/main.js', './src/db.js', './src/model.js', './src/image.js', './src/settings.js',
