@@ -1,0 +1,29 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>smoke</title>
+<pre id="out">running</pre>
+<script type="module">
+// ブラウザ(IndexedDB)での保存→読み出し→削除と、書き出しの形を確かめるスモークテスト。
+// 使い方: memo-app を静的配信して、このページを開く。結果が #out に PASS/FAIL で出る。
+import * as db from '../src/db.js';
+import { buildExport, newId } from '../src/model.js';
+
+const out = document.getElementById('out');
+const log = [];
+const check = (name, cond) => log.push(`${cond ? 'PASS' : 'FAIL'} ${name}`);
+try {
+  const book = { id: newId(), title: 'スモーク本', isbn: '9784004321224', authors: '', createdAt: new Date().toISOString() };
+  await db.putBook(book);
+  check('putBook/getBook', (await db.getBook(book.id))?.title === 'スモーク本');
+  const note = { id: newId(), bookId: book.id, page: '12', quote: '引用', comment: '所感', ocr: 'manual', createdAt: new Date().toISOString() };
+  await db.putNote(note);
+  check('notesOfBook', (await db.notesOfBook(book.id)).length === 1);
+  const data = buildExport(await db.allBooks(), await db.allNotes());
+  check('buildExport', data.books.some((b) => b.title === 'スモーク本' && b.notes[0].page === '12'));
+  await db.deleteBook(book.id);
+  check('deleteBook cascades notes', (await db.notesOfBook(book.id)).length === 0 && !(await db.getBook(book.id)));
+} catch (e) {
+  log.push('FAIL exception: ' + e);
+}
+out.textContent = log.join('\n') + '\nDONE';
+</script>
